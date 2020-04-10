@@ -73,22 +73,24 @@ def chechConditions(t, Pwpv, Plsl, CbatMin):
         Cbat = CalcBatteryCapacity()
         decisionOnBattery = decideOnBaterryCapacity(Cbat, CbatMin, Pwpv, Plsl)
         print(Back.RED + "Battery Capacity: {}%".format(round(Cbat, 4) * 100))
-        # if decisionOnBattery["code"] == 0: #Διοχέτευση της παραγόμενης ενέργειας στο δίκτυο ηλεκτρικής ενέργειας
-        #     print(
-        #         Fore.GREEN + decisionOnBattery["msg"],
-        #         "=",
-        #         Fore.BLUE
-        #         + str(decisionOnBattery["value"]),
-        #     )
-        # elif decisionOnBattery["code"] == 1: #Φόρτιση μπαταρίας με ισχύ φόρτισης Pch(t) = PWPV(t) - PLSL(t)
-        #     print(
-        #         Fore.GREEN + decisionOnBattery["msg"],
-        #         "with Power=",
-        #         Fore.CYAN
-        #         + str(decisionOnBattery["value"]),
-        #     )
-        # else: ##Error πήγαινε στο βήμα IΧ
-        #     print(Fore.RED + decideOnBaterryCapacity(Cbat, CbatMin, Pwpv, Plsl)["msg"])
+        if (
+            decisionOnBattery["code"] == 0
+        ):  # Διοχέτευση της παραγόμενης ενέργειας στο δίκτυο ηλεκτρικής ενέργειας
+            print(
+                Fore.GREEN + decisionOnBattery["msg"],
+                "=",
+                Fore.BLUE + str(decisionOnBattery["value"]),
+            )
+        elif (
+            decisionOnBattery["code"] == 1
+        ):  # Φόρτιση μπαταρίας με ισχύ φόρτισης Pch(t) = PWPV(t) - PLSL(t)
+            print(
+                Fore.GREEN + decisionOnBattery["msg"],
+                "with Power=",
+                Fore.CYAN + str(decisionOnBattery["value"]),
+            )
+        else:  ##Error πήγαινε στο βήμα IΧ
+            print(Fore.RED + decideOnBaterryCapacity(Cbat, CbatMin, Pwpv, Plsl)["msg"])
         decisionOnBattery["case"] = "case1"
         return decisionOnBattery
     elif Pwpv < Plsl and Pwpv > 0 and Plsl > 0:
