@@ -72,9 +72,7 @@ def chechConditions(t, Pwpv, Plsl, CbatMin):
     if Pwpv > Plsl and Pwpv > 0 and Plsl > 0:
         Cbat = CalcBatteryCapacity()
         decisionOnBattery = decideOnBaterryCapacity(Cbat, CbatMin, Pwpv, Plsl)
-        print(
-            Back.RED + "Battery Capacity: {}%".format(round(Cbat, 4) * 100)
-        )
+        print(Back.RED + "Battery Capacity: {}%".format(round(Cbat, 4) * 100))
         # if decisionOnBattery["code"] == 0: #Διοχέτευση της παραγόμενης ενέργειας στο δίκτυο ηλεκτρικής ενέργειας
         #     print(
         #         Fore.GREEN + decisionOnBattery["msg"],
@@ -129,8 +127,8 @@ def main():
         if len(case) == 4:
             print(case)
             while case["code"] == 2:
-              print("New TRY")
-              case = chechConditions(t, Pwpv, Plsl, 0.99)
+                print("New TRY")
+                case = chechConditions(t, Pwpv, Plsl, 0.99)
         v.append(case)
 
     calcV = pd.DataFrame(
