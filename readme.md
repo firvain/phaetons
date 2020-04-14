@@ -7,25 +7,27 @@ PHAETONS
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
 
 ### Prerequisites
-Anaconda > v 4.8.2
-
-
-
-### Installing
-
+[Anaconda](https://www.anaconda.com/distribution/) > v4.8.2
 ```
 conda env create -f environment.yml
 ```
+
+### Installing
 
 ```
 conda activate paethons
 ```
 
+```
+cd <parent_dir>
+git clone https://github.com/firvain/phaetons.git
+```
+
 
 ## Running
-
-python .\main.py
-
+```
+cd <parent_dir>/phaetons && python .\main.py
+```
 
 ## Versioning
 
