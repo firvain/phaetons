@@ -28,7 +28,12 @@ git clone https://github.com/firvain/phaetons.git
 ```
 cd <parent_dir>/phaetons && python .\main.py
 ```
+## Developing
+```
+git fetch
 
+git checkout <branchxyz>
+```
 ## Versioning
 
 We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/firvain/phaetons/tags).
