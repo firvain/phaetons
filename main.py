@@ -2,47 +2,18 @@
 Module Docstring
 """
 import datetime
-import numpy as np
-
 from colorama import Fore, Back, init
 
-import pandas as pd
+from neuralNetwork import getPl, getPls, getPpv, getPw
+from battery import MinCapacity, Capacity
+from calculations import CalcPdis, CalcPlsl, CalcPwpv
+from export import createPandas
 
 init(autoreset=True)
 
 __author__ = "Your Name"
 __version__ = "0.1.0"
 __license__ = "MIT"
-
-
-
-
-def CalcPw(t):
-    return (np.random.rand(1) * np.random.randint(1, 100))[0]
-
-
-def CalcPpv(t):
-    return (np.random.rand(1) * np.random.randint(1, 100))[0]
-
-
-def CalcPwpv(Pw, Ppv):
-    return Pw + Ppv
-
-
-def CalcPl(t):
-    return (np.random.rand(1) * np.random.randint(1, 100))[0]
-
-
-def CalcPls(t):
-    return (np.random.rand(1) * np.random.randint(1, 100))[0]
-
-
-def CalcPlsl(Pl, Pls):
-    return Pl + Pls
-
-
-def CalcBatteryCapacity(t):
-    return np.random.rand(1)[0]
 
 
 def decideOnBaterryCapacity(Cbat, CbatMin, Pwpv, Plsl):
@@ -73,30 +44,27 @@ def decideOnBaterryCapacity(Cbat, CbatMin, Pwpv, Plsl):
     return a
 
 
-def CalcPdis(t):
-    return (np.random.rand(1) * np.random.randint(1, 100))[0]
-
-
-def chechConditions(t, Pwpv, Plsl, CbatMin, Pl, Pls, Try = 0):
+def chechConditions(t, Pwpv, Plsl, CbatMin, Pl, Pls, Try=0):
     v = dict()
-
 
     if Pwpv > Plsl and Pwpv > 0 and Plsl > 0:
         print("case1")
         input("Press Enter to continue...")
-        Cbat = CalcBatteryCapacity(t)
+        Cbat = Capacity(t)
         d = decideOnBaterryCapacity(Cbat, CbatMin, Pwpv, Plsl)
         if d["code"] == 2:
             print(Back.RED + Fore.WHITE + "New TRY")
             chechConditions(t, Pwpv, Plsl, CbatMin, Pl, Pls)
         b = dict()
         b["case"] = "case1"
-        v = {**b, **d }
+        v = {**b, **d}
         return v
     elif Pwpv < Plsl and Pwpv > 0 and Plsl > 0:
         print("case2")
         input("Press Enter to continue...")
         v["case"] = "case2"
+        v["code"] = float("NaN")
+        v["msg"] = ""
         v["GRID"] = float("NaN")
         v["LED"] = float("NaN")
         v["LOAD STATION"] = float("NaN")
@@ -168,28 +136,28 @@ def chechConditions(t, Pwpv, Plsl, CbatMin, Pl, Pls, Try = 0):
 
 def main():
     """ Main entry point of the app """
-    v = list()
+    results = list()
     today = datetime.datetime.now().date()
 
     for t in range(24):
         trynum = 0
-        CbatMin = 0.15
-        Pw = CalcPw(t)
-        Ppv = CalcPpv(t)
+        CbatMin = MinCapacity()
+        Pw = getPw(t)
+        Ppv = getPpv(t)
         Pwpv = CalcPwpv(Pw, Ppv)
 
-        Pl = CalcPl(t)
-        Pls = CalcPls(t)
+        Pl = getPl(t)
+        Pls = getPls(t)
         Plsl = CalcPlsl(Pl, Pls)
 
-        v.append(datetime.datetime(today.year, today.month, today.day, t))
-        v.append(t)
-        v.append(Pw)
-        v.append(Ppv)
-        v.append(Pwpv)
-        v.append(Pl)
-        v.append(Pls)
-        v.append(Plsl)
+        results.append(datetime.datetime(today.year, today.month, today.day, t))
+        results.append(t)
+        results.append(Pw)
+        results.append(Ppv)
+        results.append(Pwpv)
+        results.append(Pl)
+        results.append(Pls)
+        results.append(Plsl)
         print(
             Back.LIGHTGREEN_EX + Fore.BLACK + "Step: {}".format(t),
             Fore.BLUE + "Pwpv: {}".format(Pwpv),
@@ -202,14 +170,11 @@ def main():
         #     print(Back.RED + Fore.WHITE + "New TRY")
         #     case = chechConditions(t, Pwpv, Plsl, CbatMin, Pl, Pls, trynum)
         #     print(case)
-        v.append(case)
+        results.append(case)
 
-    calcV = pd.DataFrame(
-        data=np.asarray(v).reshape(24, 9)[:, 1:9],
-        columns=["Step", "Pw", "Ppv", "Pwpv", "Pl", "Pls", "Plsl", "case"],
-        index=np.asarray(v).reshape(24, 9)[:, 0],
-    )
-    # print(calcV.head(5))
+    calcV = createPandas(results)
+    for c in calcV["case"]:
+        print(c)
 
 
 if __name__ == "__main__":
