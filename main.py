@@ -7,7 +7,8 @@ from colorama import Fore, Back, init
 from neuralNetwork import getPl, getPls, getPpv, getPw
 from battery import MinCapacity, Capacity
 from calculations import CalcPdis, CalcPlsl, CalcPwpv
-from export import createPandas
+from export import createPandas, head
+import calendar
 
 init(autoreset=True)
 
@@ -122,7 +123,7 @@ def chechConditions(t, Pwpv, Plsl, CbatMin, Pl, Pls, Try=0):
         print("case4")
         input("Press Enter to continue...")
         v["case"] = "case4"
-        v["code"] = 5
+        v["code"] = 6
         v["msg"] = ""
         v["GRID"] = float("NaN")
         v["LED"] = float("NaN")
@@ -131,14 +132,26 @@ def chechConditions(t, Pwpv, Plsl, CbatMin, Pl, Pls, Try=0):
 
         return v
     else:
-        return "Battery Capacity Unchanged"
+        v["case"] = "case5"
+        v["code"] = 7
+        v["msg"] = "Battery Capacity Unchanged"
+        v["GRID"] = float("NaN")
+        v["LED"] = float("NaN")
+        v["LOAD STATION"] = float("NaN")
+        v["value"] = float("NaN")
+        return v
 
 
 def main():
     """ Main entry point of the app """
     results = list()
     today = datetime.datetime.now().date()
-
+    todayIso = datetime.datetime.now().date().isoformat()
+    print(todayIso)
+    print(
+        "Current Year: {}".format(today.year)
+        + " is leap: {}".format(calendar.isleap(today.year))
+    )
     for t in range(24):
         trynum = 0
         CbatMin = MinCapacity()
@@ -150,8 +163,12 @@ def main():
         Pls = getPls(t)
         Plsl = CalcPlsl(Pl, Pls)
 
-        results.append(datetime.datetime(today.year, today.month, today.day, t))
         results.append(t)
+        results.append(
+            datetime.datetime(
+                today.year, today.month, today.day, t, tzinfo=datetime.timezone.utc
+            ).isoformat()
+        )
         results.append(Pw)
         results.append(Ppv)
         results.append(Pwpv)
@@ -165,16 +182,21 @@ def main():
             Fore.MAGENTA + "CbatMin: {}".format(round(CbatMin, 4) * 100),
         )
         case = chechConditions(t, Pwpv, Plsl, CbatMin, Pl, Pls, trynum)
-        print(case)
+        # print(case)
         # while case["code"] == 2:
         #     print(Back.RED + Fore.WHITE + "New TRY")
         #     case = chechConditions(t, Pwpv, Plsl, CbatMin, Pl, Pls, trynum)
         #     print(case)
         results.append(case)
+        # print(results)
 
     calcV = createPandas(results)
-    for c in calcV["case"]:
-        print(c)
+    # print(calcV.head())
+    head(calcV)
+    # print(calcV.iloc[0]["datetime"].isoformat())
+
+    """ for c in calcV["case"]:
+        print(c) """
 
 
 if __name__ == "__main__":
