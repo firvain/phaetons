@@ -7,10 +7,10 @@ from colorama import Fore, Back, init
 from neuralNetwork import getPl, getPls, getPpv, getPw
 from battery import MinCapacity, Capacity
 from calculations import CalcPdis, CalcPlsl, CalcPwpv
-from export import createPandas, head
+from export import createPandas  # ,  head
 import calendar
 from db import insertJson
-
+from pylons import pylons
 
 init(autoreset=True)
 
@@ -146,7 +146,9 @@ def chechConditions(t, Pwpv, Plsl, CbatMin, Pl, Pls, Try=0):
 
 def main():
     """ Main entry point of the app """
+    pylon = list(filter(lambda pylon: pylon["id"] == "1", pylons))
 
+    input("Press Enter to continue...")
     results = list()
     today = datetime.datetime.now().date()
     todayIso = datetime.datetime.now().date().isoformat()
@@ -167,9 +169,11 @@ def main():
         Plsl = CalcPlsl(Pl, Pls)
 
         results.append(t)
+        results.append(pylon)
         results.append(
             datetime.datetime(
-                today.year, today.month, today.day, t, tzinfo=datetime.timezone.utc
+                today.year, today.month, today.day, t,
+                tzinfo=datetime.timezone.utc
             ).isoformat()
         )
         results.append(Pw)
@@ -197,8 +201,7 @@ def main():
     # print(calcV.head())
     # head(calcV)
     if len(calcV.index) == 24:
-        j = calcV.to_dict('records')
-        insertJson(j)
+        insertJson(calcV.to_dict("records"))
 
     # print(calcV.iloc[0]["datetime"].isoformat())
 
