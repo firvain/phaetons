@@ -2,6 +2,6 @@
   "python.linting.pylintEnabled": false,
   "python.linting.flake8Enabled": true,
   "python.linting.enabled": true,
-  "python.pythonPath": "C:\\Users\\Firvain\\anaconda3\\envs\\phaetons\\python.exe",
+  "python.pythonPath": "/Users/firvain/.pyenv/versions/phaetons/bin/python",
   "python.formatting.provider": "black"
 }
