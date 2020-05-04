@@ -172,8 +172,11 @@ def main():
         results.append(pylon)
         results.append(
             datetime.datetime(
-                today.year, today.month, today.day, t,
-                tzinfo=datetime.timezone.utc
+                today.year,
+                today.month,
+                today.day,
+                t,
+                tzinfo=datetime.timezone.utc,
             ).isoformat()
         )
         results.append(Pw)

@@ -1,0 +1,16 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "python.formatting.blackArgs": [
+      "--line-length=80 "
+    ],
+    "python.formatting.provider": "black",
+    "python.linting.flake8Args": [
+      "--max-line-length=80"
+    ]
+  }
+}
