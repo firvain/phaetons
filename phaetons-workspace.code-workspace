@@ -6,7 +6,7 @@
   ],
   "settings": {
     "python.formatting.blackArgs": [
-      "--line-length=80 "
+      "--line-length=80"
     ],
     "python.formatting.provider": "black",
     "python.linting.flake8Args": [
