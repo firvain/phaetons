@@ -9,6 +9,8 @@ from battery import MinCapacity, Capacity
 from calculations import CalcPdis, CalcPlsl, CalcPwpv
 from export import createPandas, head
 import calendar
+from db import insertJson
+
 
 init(autoreset=True)
 
@@ -50,7 +52,7 @@ def chechConditions(t, Pwpv, Plsl, CbatMin, Pl, Pls, Try=0):
 
     if Pwpv > Plsl and Pwpv > 0 and Plsl > 0:
         print("case1")
-        input("Press Enter to continue...")
+        # input("Press Enter to continue...")
         Cbat = Capacity(t)
         d = decideOnBaterryCapacity(Cbat, CbatMin, Pwpv, Plsl)
         if d["code"] == 2:
@@ -62,7 +64,7 @@ def chechConditions(t, Pwpv, Plsl, CbatMin, Pl, Pls, Try=0):
         return v
     elif Pwpv < Plsl and Pwpv > 0 and Plsl > 0:
         print("case2")
-        input("Press Enter to continue...")
+        # input("Press Enter to continue...")
         v["case"] = "case2"
         v["code"] = float("NaN")
         v["msg"] = ""
@@ -109,7 +111,7 @@ def chechConditions(t, Pwpv, Plsl, CbatMin, Pl, Pls, Try=0):
 
     elif Pwpv == 0 and Plsl > 0:
         print("case3")
-        input("Press Enter to continue...")
+        # input("Press Enter to continue...")
         v["case"] = "case2"
         v["code"] = 5
         v["msg"] = ""
@@ -121,7 +123,7 @@ def chechConditions(t, Pwpv, Plsl, CbatMin, Pl, Pls, Try=0):
         return v
     elif Pwpv > 0 and Plsl == 0:
         print("case4")
-        input("Press Enter to continue...")
+        # input("Press Enter to continue...")
         v["case"] = "case4"
         v["code"] = 6
         v["msg"] = ""
@@ -144,6 +146,7 @@ def chechConditions(t, Pwpv, Plsl, CbatMin, Pl, Pls, Try=0):
 
 def main():
     """ Main entry point of the app """
+
     results = list()
     today = datetime.datetime.now().date()
     todayIso = datetime.datetime.now().date().isoformat()
@@ -192,13 +195,15 @@ def main():
 
     calcV = createPandas(results)
     # print(calcV.head())
-    head(calcV)
-    # print(calcV.iloc[0]["datetime"].isoformat())
+    # head(calcV)
+    if len(calcV.index) == 24:
+        j = calcV.to_dict('records')
+        insertJson(j)
 
-    """ for c in calcV["case"]:
-        print(c) """
+    # print(calcV.iloc[0]["datetime"].isoformat())
 
 
 if __name__ == "__main__":
     """ This is executed when run from the command line """
+
     main()
