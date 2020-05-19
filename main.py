@@ -177,7 +177,7 @@ def main():
                 today.day,
                 t,
                 tzinfo=datetime.timezone.utc,
-            ).isoformat()
+            )
         )
         results.append(Pw)
         results.append(Ppv)
