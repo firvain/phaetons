@@ -4,7 +4,7 @@ import numpy as np
 
 def createPandas(
     result, cols=["pylon", "datetime", "Pw", "Ppv", "Pwpv", "Pl", "Pls",
-                  "Plsl", "case"]
+                  "Plsl", "recommendations"]
 ):
     return pd.DataFrame(
         data=np.asarray(result).reshape(24, 10)[:, 1:10],
