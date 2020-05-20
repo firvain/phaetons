@@ -146,9 +146,8 @@ def chechConditions(t, Pwpv, Plsl, CbatMin, Pl, Pls, Try=0):
 
 def main():
     """ Main entry point of the app """
-    pylon = list(filter(lambda pylon: pylon["id"] == "1", pylons))
+    pylon = list(filter(lambda pylon: pylon["id"] == "2", pylons))
 
-    input("Press Enter to continue...")
     results = list()
     today = datetime.datetime.now().date()
     todayIso = datetime.datetime.now().date().isoformat()
@@ -191,13 +190,13 @@ def main():
             Fore.CYAN + "Plsl: {}".format(Plsl),
             Fore.MAGENTA + "CbatMin: {}".format(round(CbatMin, 4) * 100),
         )
-        case = chechConditions(t, Pwpv, Plsl, CbatMin, Pl, Pls, trynum)
+        recommendations = chechConditions(t, Pwpv, Plsl, CbatMin, Pl, Pls, trynum)
         # print(case)
         # while case["code"] == 2:
         #     print(Back.RED + Fore.WHITE + "New TRY")
         #     case = chechConditions(t, Pwpv, Plsl, CbatMin, Pl, Pls, trynum)
         #     print(case)
-        results.append(case)
+        results.append(recommendations)
         # print(results)
 
     calcV = createPandas(results)
