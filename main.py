@@ -20,6 +20,7 @@ __license__ = "MIT"
 
 
 def decideOnBaterryCapacity(Cbat, CbatMin, Pwpv, Plsl):
+    print(Cbat, CbatMin, Pwpv, Plsl)
     a = dict()
     if Cbat == 1.0:
         a["code"] = 0
@@ -49,22 +50,25 @@ def decideOnBaterryCapacity(Cbat, CbatMin, Pwpv, Plsl):
 
 def chechConditions(t, Pwpv, Plsl, CbatMin, Pl, Pls, Try=0):
     v = dict()
-
     if Pwpv > Plsl and Pwpv > 0 and Plsl > 0:
-        print("case1")
-        # input("Press Enter to continue...")
+
+        print(Fore.MAGENTA + "CASE 1")
+        input("Press Enter to continue...")
+        print(t, Pwpv, Plsl, CbatMin, Pl, Pls)
         Cbat = Capacity(t)
         d = decideOnBaterryCapacity(Cbat, CbatMin, Pwpv, Plsl)
-        if d["code"] == 2:
-            print(Back.RED + Fore.WHITE + "New TRY")
-            chechConditions(t, Pwpv, Plsl, CbatMin, Pl, Pls)
-        b = dict()
-        b["case"] = "case1"
-        v = {**b, **d}
-        return v
+
+        if d["code"] != 2:
+            b = dict()
+            b["case"] = "case1"
+            v = {**b, **d}
+            return v
+        print(Back.RED + Fore.WHITE + "New TRY")
+        return chechConditions(t, Pwpv, Plsl, CbatMin, Pl, Pls)
+
     elif Pwpv < Plsl and Pwpv > 0 and Plsl > 0:
-        print("case2")
-        # input("Press Enter to continue...")
+        print(Fore.MAGENTA + "CASE2")
+        input("Press Enter to continue...")
         v["case"] = "case2"
         v["code"] = float("NaN")
         v["msg"] = ""
@@ -81,37 +85,39 @@ def chechConditions(t, Pwpv, Plsl, CbatMin, Pl, Pls, Try=0):
             v["msg"] = "Discharge Battery"
             v["code"] = 3
             v["value"] = Pdis
+            print(v)
+            return v
         else:
             if Try == 0:
                 print(Fore.RED + "Try {}".format(Try))
                 Pls = 0
                 Plsl = CalcPlsl(Pl, Pls)
                 Try = 1
-                chechConditions(t, Pwpv, Plsl, CbatMin, Pl, Pls, Try)
+                return chechConditions(t, Pwpv, Plsl, CbatMin, Pl, Pls, Try)
             elif Try == 1:
                 print(Fore.RED + "Try {}".format(Try))
                 Pl = 0.99 * Pl  # θέσε τον φωτισμό σε κατάσταση Dimming 80%
                 Plsl = CalcPlsl(Pl, Pls)
                 Try = 2
-                chechConditions(t, Pwpv, Plsl, CbatMin, Pl, Pls, Try)
+                return chechConditions(t, Pwpv, Plsl, CbatMin, Pl, Pls, Try)
             elif Try == 2:
                 print(Fore.RED + "Try {}".format(Try))
                 Pl = 0.6 * Pl  # θέσε τον φωτισμό σε κατάσταση Dimming 60%
                 Plsl = CalcPlsl(Pl, Pls)
                 Try = 3
-                chechConditions(t, Pwpv, Plsl, CbatMin, Pl, Pls, Try)
+                return chechConditions(t, Pwpv, Plsl, CbatMin, Pl, Pls, Try)
 
             v["code"] = 4
             v["msg"] = "Use Power from the GRID"
             v["GRID"] = "ON"
             v["LED"] = "ON"
             v["LOAD STATION"] = "ON"
-
-        return v
+            print(v)
+            return v
 
     elif Pwpv == 0 and Plsl > 0:
-        print("case3")
-        # input("Press Enter to continue...")
+        print(Fore.MAGENTA + "CASE3")
+        input("Press Enter to continue...")
         v["case"] = "case2"
         v["code"] = 5
         v["msg"] = ""
@@ -122,8 +128,8 @@ def chechConditions(t, Pwpv, Plsl, CbatMin, Pl, Pls, Try=0):
 
         return v
     elif Pwpv > 0 and Plsl == 0:
-        print("case4")
-        # input("Press Enter to continue...")
+        print(Fore.MAGENTA + "CASE4")
+        input("Press Enter to continue...")
         v["case"] = "case4"
         v["code"] = 6
         v["msg"] = ""
@@ -134,7 +140,7 @@ def chechConditions(t, Pwpv, Plsl, CbatMin, Pl, Pls, Try=0):
 
         return v
     else:
-        v["case"] = "case5"
+        print(Fore.MAGENTA + "CASE5")
         v["code"] = 7
         v["msg"] = "Battery Capacity Unchanged"
         v["GRID"] = float("NaN")
@@ -190,8 +196,13 @@ def main():
             Fore.CYAN + "Plsl: {}".format(Plsl),
             Fore.MAGENTA + "CbatMin: {}".format(round(CbatMin, 4) * 100),
         )
-        recommendations = chechConditions(t, Pwpv, Plsl, CbatMin, Pl, Pls, trynum)
-        # print(case)
+        recommendations = chechConditions(
+            t, Pwpv, Plsl, CbatMin, Pl, Pls, trynum
+        )
+        print("REC")
+        print()
+        print(recommendations)
+        print()
         # while case["code"] == 2:
         #     print(Back.RED + Fore.WHITE + "New TRY")
         #     case = chechConditions(t, Pwpv, Plsl, CbatMin, Pl, Pls, trynum)
@@ -200,7 +211,7 @@ def main():
         # print(results)
 
     calcV = createPandas(results)
-    # print(calcV.head())
+    print(calcV)
     # head(calcV)
     if len(calcV.index) == 24:
         insertJson(calcV.to_dict("records"))
