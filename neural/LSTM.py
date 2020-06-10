@@ -14,6 +14,21 @@ from keras.layers import LSTM
 
 # convert series to supervised learning
 def series_to_supervised(data, n_in=1, n_out=1, dropnan=True):
+    """Transform a time series dataset into a supervised learning dataset
+
+    Args:
+        data (object): Sequence of observations as a list or 2D NumPy array.
+        n_in (int, optional): Number of lag observations as input.
+        Defaults to 1.
+        n_out (int, optional): Number of observations as output (y).
+        Defaults to 1.
+        dropnan (bool, optional): Boolean whether or not to drop rows with NaN
+        values. Defaults to True.
+
+    Returns:
+        [DataFrame]: Pandas DataFrame of series framed for supervised learning.
+    """
+
     n_vars = 1 if type(data) is list else data.shape[1]
     df = DataFrame(data)
     cols, names = list(), list()
@@ -37,71 +52,140 @@ def series_to_supervised(data, n_in=1, n_out=1, dropnan=True):
     return agg
 
 
-# load dataset
-dataset = read_csv("data/pollution.csv", header=0, index_col=0)
-values = dataset.values
-# integer encode direction
-encoder = LabelEncoder()
-values[:, 4] = encoder.fit_transform(values[:, 4])
-# ensure all data is float
-values = values.astype("float32")
-# normalize features
-scaler = MinMaxScaler(feature_range=(0, 1))
-scaled = scaler.fit_transform(values)
-# frame as supervised learning
-reframed = series_to_supervised(scaled, 1, 1)
-# drop columns we don't want to predict
-reframed.drop(
-    reframed.columns[[9, 10, 11, 12, 13, 14, 15]], axis=1, inplace=True
-)
-print(reframed.head())
+def LSTM_Prepare(fname):
+    """Prepare data for LSTM model
 
-# split into train and test sets
-values = reframed.values
-n_train_hours = 365 * 24
-train = values[:n_train_hours, :]
-test = values[n_train_hours:, :]
-# split into input and outputs
-train_X, train_y = train[:, :-1], train[:, -1]
-test_X, test_y = test[:, :-1], test[:, -1]
-# reshape input to be 3D [samples, timesteps, features]
-train_X = train_X.reshape((train_X.shape[0], 1, train_X.shape[1]))
-test_X = test_X.reshape((test_X.shape[0], 1, test_X.shape[1]))
-print(train_X.shape, train_y.shape, test_X.shape, test_y.shape)
+    Args:
+        fname (string): Raw data csv path
 
-# design network
-model = Sequential()
-model.add(LSTM(50, input_shape=(train_X.shape[1], train_X.shape[2])))
-model.add(Dense(1))
-model.compile(loss="mae", optimizer="adam")
-# fit network
-history = model.fit(
-    train_X,
-    train_y,
-    epochs=50,
-    batch_size=72,
-    validation_data=(test_X, test_y),
-    verbose=2,
-    shuffle=False,
-)
-# plot history
-pyplot.plot(history.history["loss"], label="train")
-pyplot.plot(history.history["val_loss"], label="test")
-pyplot.legend()
-pyplot.show()
+    Returns:
+        [tuple]: Train data, Test Data and Data Scaler
+    """
+    # load dataset
+    dataset = read_csv(fname, header=0, index_col=0)
+    values = dataset.values
+    # integer encode direction
+    encoder = LabelEncoder()
+    values[:, 4] = encoder.fit_transform(values[:, 4])
+    # ensure all data is float
+    values = values.astype("float32")
+    # normalize features
+    scaler = MinMaxScaler(feature_range=(0, 1))
+    scaled = scaler.fit_transform(values)
+    # frame as supervised learning
+    reframed = series_to_supervised(scaled, 1, 1)
+    # drop columns we don't want to predict
+    reframed.drop(
+        reframed.columns[[9, 10, 11, 12, 13, 14, 15]], axis=1, inplace=True
+    )
+    print(reframed.head())
 
-# make a prediction
-yhat = model.predict(test_X)
-test_X = test_X.reshape((test_X.shape[0], test_X.shape[2]))
-# invert scaling for forecast
-inv_yhat = concatenate((yhat, test_X[:, 1:]), axis=1)
-inv_yhat = scaler.inverse_transform(inv_yhat)
-inv_yhat = inv_yhat[:, 0]
-# invert scaling for actual
-test_y = test_y.reshape((len(test_y), 1))
-inv_y = concatenate((test_y, test_X[:, 1:]), axis=1)
-inv_y = scaler.inverse_transform(inv_y)
-inv_y = inv_y[:, 0]
-# calculate RMSE
-rmse = sqrt(mean_squared_error(inv_y, inv_yhat))
-print("Test RMSE: %.3f" % rmse)
+    # split into train and test sets
+    values = reframed.values
+    n_train_hours = 365 * 24
+    train = values[:n_train_hours, :]
+    test = values[n_train_hours:, :]
+    # split into input and outputs
+    train_X, train_y = train[:, :-1], train[:, -1]
+    test_X, test_y = test[:, :-1], test[:, -1]
+    # reshape input to be 3D [samples, timesteps, features]
+    train_X = train_X.reshape((train_X.shape[0], 1, train_X.shape[1]))
+    test_X = test_X.reshape((test_X.shape[0], 1, test_X.shape[1]))
+    print(train_X.shape, train_y.shape, test_X.shape, test_y.shape)
+    return train_X, train_y, test_X, test_y, scaler
+
+
+def LSTM_Exec(train_X, train_y, test_X, test_y, visualize):
+    """Execute LSTM model
+
+    Args:
+        train_X (ndarray): Input Data
+        train_y (ndarray): Target Data
+        test_X (ndarray): Validation Data
+        test_y (ndarray): Validation Data
+        visualize (boolean): Wheather to plot input and output data.
+
+    Returns:
+        Sequential: Returns Sequential model
+    """
+    # design network
+    model = Sequential()
+    model.add(LSTM(50, input_shape=(train_X.shape[1], train_X.shape[2])))
+    model.add(Dense(1))
+    model.compile(loss="mae", optimizer="adam")
+    # fit network
+    history = model.fit(
+        train_X,
+        train_y,
+        epochs=50,
+        batch_size=72,
+        validation_data=(test_X, test_y),
+        verbose=2,
+        shuffle=False,
+    )
+    if visualize is True:
+        # plot history
+        pyplot.plot(history.history["loss"], label="train")
+        pyplot.plot(history.history["val_loss"], label="test")
+        pyplot.legend()
+        pyplot.show()
+    return model
+
+
+def LST_Predict(train_X, train_y, test_X, test_y, model, scaler):
+    """[summary]
+
+    Args:
+        train_X (ndarray): [description]
+        train_y (ndarray): [description]
+        test_X (ndarray): [description]
+        test_y (ndarray): [description]
+        model (Sequential): Keras Sequential model
+        scaler ([type]): [description]
+
+    Returns:
+        [type]: [description]
+    """
+    # make a prediction
+    yhat = model.predict(test_X)
+    test_X = test_X.reshape((test_X.shape[0], test_X.shape[2]))
+    # invert scaling for forecast
+    inv_yhat = concatenate((yhat, test_X[:, 1:]), axis=1)
+    inv_yhat = scaler.inverse_transform(inv_yhat)
+    inv_yhat = inv_yhat[:, 0]
+    # invert scaling for actual
+    test_y = test_y.reshape((len(test_y), 1))
+    inv_y = concatenate((test_y, test_X[:, 1:]), axis=1)
+    inv_y = scaler.inverse_transform(inv_y)
+    inv_y = inv_y[:, 0]
+    return inv_y, inv_yhat
+
+
+def LSTM_Eval(inv_y, inv_yhat):
+    """Evaluate LSTM model
+
+    Args:
+        inv_y (array): Actual
+        inv_yhat (array): Forecast
+    """
+    # calculate RMSE
+    rmse = sqrt(mean_squared_error(inv_y, inv_yhat))
+    print("Test RMSE: %.3f" % rmse)
+
+
+def LSTM_RUN(fname, visualize=False):
+    """ Run LSTM forecast model
+
+    Args:
+        fname (string): Path of CSV data
+        visualize (bool, optional): Wheater to visualize data.
+        Defaults to False.
+    """
+
+    train_X, train_y, test_X, test_y, scaler = LSTM_Prepare(fname)
+    model = LSTM_Exec(train_X, train_y, test_X, test_y, visualize)
+    inv_y, inv_yhat = LST_Predict(
+        train_X, train_y, test_X, test_y, model, scaler
+    )
+    print(inv_y[-1], inv_yhat[-1], inv_y[-2], inv_yhat[-2])
+    LSTM_Eval(inv_y, inv_yhat)

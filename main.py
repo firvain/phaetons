@@ -14,6 +14,8 @@ import os
 from db import insertJson
 from pylons import pylons
 
+from neural import LSTM
+
 init(autoreset=True)
 
 __author__ = "Evangelos Tsipis"
@@ -232,6 +234,8 @@ def chechConditions(t, Pwpv, Plsl, CbatMin, Pl, Pls, Try=0):
 
 def main():
     """ Main entry point of the app """
+    LSTM.LSTM_RUN("data/pollution.csv")
+    quit()
     # pylon = list(filter(lambda pylon: pylon["id"] == "1", pylons))
     for pylon in pylons:
         results = list()
