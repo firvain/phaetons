@@ -3,8 +3,11 @@ Module Docstring
 """
 import datetime
 from colorama import Fore, Back, init
+# from neural.example import LSTM
 
-from neuralNetwork import getPl, getPls, getPpv, getPw
+# from neuralNetwork import getPl, getPls, getPpv, getPw, dummyResult
+from neuralNetwork import dummyResult
+from neuralNetwork import predictNeurals
 from battery import MinCapacity, Capacity
 from calculations import CalcPdis, CalcPlsl, CalcPwpv
 from export import createPandas  # ,  head
@@ -14,7 +17,6 @@ import os
 from db import insertJson
 from pylons import pylons
 
-from neural import LSTM
 
 init(autoreset=True)
 
@@ -29,11 +31,16 @@ if STEPS is not None:
     STEPS = int(STEPS)
 else:
     STEPS = 24
-FORCASTDAYS = os.getenv("FORCASTDAYS")
-if FORCASTDAYS is not None:
-    FORCASTDAYS = int(FORCASTDAYS)
+FORECASTDAYS = os.getenv("FORECASTDAYS")
+if FORECASTDAYS is not None:
+    FORECASTDAYS = int(FORECASTDAYS)
 else:
-    FORCASTDAYS = 0
+    FORECASTDAYS = 0
+FORECASTHOURS = os.getenv("FORECASTHOURS")
+if FORECASTHOURS is not None:
+    FORECASTHOURS = int(FORECASTHOURS)
+else:
+    FORECASTHOURS = 0
 
 
 def decideOnBaterryCapacity(Cbat, CbatMin, Pwpv, Plsl):
@@ -121,7 +128,7 @@ def chechConditions(t, Pwpv, Plsl, CbatMin, Pl, Pls, Try=0):
             v["msg"] = "Discharge Battery"
             v["code"] = 3
             v["value"] = Pdis
-            print(v)
+            # print(v)
             return v
         else:
             if Try == 0:
@@ -234,12 +241,11 @@ def chechConditions(t, Pwpv, Plsl, CbatMin, Pl, Pls, Try=0):
 
 def main():
     """ Main entry point of the app """
-    LSTM.LSTM_RUN("data/pollution.csv")
-    quit()
+
     # pylon = list(filter(lambda pylon: pylon["id"] == "1", pylons))
     for pylon in pylons:
         results = list()
-        today = datetime.datetime.now() + datetime.timedelta(days=FORCASTDAYS)
+        today = datetime.datetime.now() + datetime.timedelta(days=FORECASTDAYS)
         print(Fore.BLUE + "*" * 80)
         print(
             "Running for: "
@@ -255,16 +261,29 @@ def main():
         print()
         # todayIso = datetime.datetime.now().date().isoformat()
         # print(todayIso)
+        # LSTM.LSTM_RUN("data/example/pollution.csv", True)
+
+        (
+            predictionsPw,
+            predictionsPpv,
+            predicionsPl,
+            predictionsPls,
+        ) = predictNeurals(FORECASTHOURS, True)
 
         for t in range(STEPS):
             trynum = 0
-            CbatMin = MinCapacity()
-            Pw = getPw(t)
-            Ppv = getPpv(t)
+            CbatMin = MinCapacity()  # Get Battery Min CAPACITY
+            Pw = predictionsPw[t].item()  # PW Neural Network Calculation
+            Ppv = predictionsPpv[t].item()  # PPV Nueral Network Calculation
+            # Pw = dummyResult(t)
+            # Ppv = dummyResult(t)
+            # print(type(Pw))
             Pwpv = CalcPwpv(Pw, Ppv)
 
-            Pl = getPl(t)
-            Pls = getPls(t)
+            Pl = predicionsPl[t].item()  # PL Neural Network Calculation
+            Pls = predictionsPls[t].item()  # PLS Neural Network Calculation
+            Pl = dummyResult(t)
+            Pls = dummyResult(t)
             Plsl = CalcPlsl(Pl, Pls)
 
             results.append(t)
@@ -298,8 +317,8 @@ def main():
 
         calcV = createPandas(results)
         print(Fore.BLUE + "*" * 80)
-        print(calcV)
-        # head(calcV)
+        # print(calcV)
+        calcV.to_csv("test.csv")
         if len(calcV.index) == STEPS:
             insertJson(calcV.to_dict("records"))
 
