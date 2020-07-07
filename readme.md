@@ -7,32 +7,38 @@ PHAETONS
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
 
 ### Prerequisites
-[Anaconda](https://www.anaconda.com/distribution/) > v4.8.2
+
 ```
-conda env create -f environment.yml
+Python 3.6.10
+
+A virtual env is advised...
 ```
 
 ### Installing
 
 ```
-conda activate paethons
-```
-
-```
-cd <parent_dir>
 git clone https://github.com/firvain/phaetons.git
-```
 
+cd phaetons
+
+pip install -r requirements.txt.
+```
 
 ## Running
 ```
-cd <parent_dir>/phaetons && python .\main.py
+# FIRST
+cp .env.example .env
+# THEN update values in .env
+# AND
+cd /phaetons
+# activate env if needed e.g. source activate phaetons
+python .\main.py
 ```
 ## Developing
 ```
 git fetch
 
-git checkout <branchxyz>
+git checkout <branch>
 ```
 ## Versioning
 
@@ -42,7 +48,7 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 
 * **Evangelos Tsipis** - *Initial work* - [Terra Cognita](https://github.com/firvain)
 
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+See also the list of [contributors](https://github.com/firvain/phaetons/graphs/contributors) who participated in this project.
 
 ## License
 

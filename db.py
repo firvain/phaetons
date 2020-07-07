@@ -30,6 +30,7 @@ def getAll():
 
 
 def insertJson(j):
+    print(j)
     try:
         client = MongoClient(uri)
         db = client.phaetons
