@@ -1,0 +1,2 @@
+time,battery_current(A),battery_voltage(V),controller_temperature(C),dump_load_current(A),output_current(A),solar_current(A),solar_voltage(V),total_solar_production(Wh),total_wind_turbine_production(Wh),wind_charge_current(A),wind_turbine(RPM),wind_voltage(V)
+2020-07-23 14:00:00+03:00,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0,0.0

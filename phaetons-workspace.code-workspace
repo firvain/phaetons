@@ -11,6 +11,7 @@
     "python.formatting.provider": "black",
     "python.linting.flake8Args": [
       "--max-line-length=80"
-    ]
+    ],
+    "python.pythonPath": "C:\\Users\\Firvain\\anaconda3\\envs\\phaetons\\python.exe"
   }
 }
