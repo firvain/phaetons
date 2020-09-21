@@ -21,7 +21,7 @@ from pylons import pylons
 init(autoreset=True)
 
 __author__ = "Evangelos Tsipis"
-__version__ = "1.0.0"
+__version__ = "2.0.0"
 __license__ = "MIT"
 
 load_dotenv()
@@ -244,31 +244,40 @@ def main():
 
     # pylon = list(filter(lambda pylon: pylon["id"] == "1", pylons))
     for pylon in pylons:
+        print(pylon)
         results = list()
-        today = datetime.datetime.now() + datetime.timedelta(days=FORECASTDAYS)
+        today = datetime.datetime.now().astimezone() + datetime.timedelta(days=FORECASTDAYS)
+        print(today)
         print(Fore.BLUE + "*" * 80)
         print(
-            "Running for: "
+            "Running simulation for pylon id: "
             + Back.BLUE
-            + Fore.BLACK
-            + today.strftime("%m/%d/%Y")
+            + Fore.WHITE
+            + pylon['id']
+            + Back.RESET
+            + Fore.RESET
+            + " Description: "
+            + Back.BLUE
+            + Fore.WHITE
+            + pylon['desc']
+            + Back.RESET
+            + Fore.RESET
+            + " run time start: "
+            + today.strftime("%Y-%m-%d %H:%M:%S%z")
         )
         print(
             "Current Year: {}".format(today.year)
             + " Is LEAP: {}".format(calendar.isleap(today.year))
         )
-        print("-" * 80)
+        print(Fore.BLUE + "-" * 80)
         print()
-        # todayIso = datetime.datetime.now().date().isoformat()
-        # print(todayIso)
-        # LSTM.LSTM_RUN("data/example/pollution.csv", True)
 
         (
             predictionsPw,
             predictionsPpv,
             predicionsPl,
             predictionsPls,
-        ) = predictNeurals(FORECASTHOURS, True)
+        ) = predictNeurals(FORECASTHOURS, False)
 
         for t in range(STEPS):
             trynum = 0
@@ -318,7 +327,7 @@ def main():
         calcV = createPandas(results)
         print(Fore.BLUE + "*" * 80)
         # print(calcV)
-        calcV.to_csv("test.csv")
+        # calcV.to_csv("test.csv")
         if len(calcV.index) == STEPS:
             insertJson(calcV.to_dict("records"))
 
