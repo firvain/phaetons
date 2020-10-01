@@ -71,7 +71,7 @@ def LSTM_Exec(train_X, train_y, test_X, test_y, visualize):
     history = model.fit(
         train_X,
         train_y,
-        epochs=2000,
+        epochs=50,
         batch_size=72,
         validation_data=(test_X, test_y),
         verbose=2,

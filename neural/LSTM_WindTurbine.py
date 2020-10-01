@@ -134,7 +134,7 @@ def LSTM_Exec(train_X, train_y, test_X, test_y, visualize):
     """
     # design network
     model = Sequential()
-    model.add(LSTM(350, input_shape=(train_X.shape[1], train_X.shape[2])))
+    model.add(LSTM(50, input_shape=(train_X.shape[1], train_X.shape[2])))
     model.add(Dense(1))
     model.compile(loss="mae", optimizer="adam")
     # fit network
@@ -142,7 +142,7 @@ def LSTM_Exec(train_X, train_y, test_X, test_y, visualize):
         train_X,
         train_y,
         epochs=3,
-        batch_size=24 * 7 * 4 * 4,
+        batch_size=72,
         validation_data=(test_X, test_y),
         verbose=2,
         shuffle=False,

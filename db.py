@@ -12,17 +12,18 @@ DATABASE_PASSWORD = os.getenv("DBPASSWORD")
 DATABASE_HOST = os.getenv("DBHOST")
 DATABASE_COLLECTION_NAME = os.getenv("DBCOLLECTIONNAME")
 
-uri = "mongodb://%s:%s@%s" % (
+uri = "mongodb+srv://%s:%s@%s" % (
     quote_plus(DATABASE_USER),
     quote_plus(DATABASE_PASSWORD),
     DATABASE_HOST,
 )
-
+print(uri)
 
 def getAll():
     try:
         client = MongoClient(uri)
-        db = client.phaetons
+        db = client.results
+        print(db)
         print(db.get_collection(DATABASE_COLLECTION_NAME).find_one({}))
         client.close()
     except ConnectionFailure:
