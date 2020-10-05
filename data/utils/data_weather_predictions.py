@@ -39,7 +39,7 @@ def get_openweather_data(lat, lon, location):
     df.rename(columns={"dt": "time", "temp": "temperature"}, inplace=True)
     df.set_index("time", inplace=True)
     file_name = df.iloc[0].name.strftime("%Y_%m_%d") + "_" + location + ".csv"
-    p = Path(BASE_DATA_DIR + "openweathremap")
+    p = Path(BASE_DATA_DIR + "/openweathermap")
     df.to_csv(p / file_name)
 
 
