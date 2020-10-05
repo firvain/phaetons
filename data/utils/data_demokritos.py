@@ -60,9 +60,8 @@ def save_data_to_json(device, data):
     Args:
         name ([str]): base file name
     """
-    dir_path = Path("C:/Users/Tsipis/Documents/Data/raw")
     file_name = datetime.now().strftime("%Y_%m_%d") + "_" + device + ".json"
-    file_path = dir_path / file_name
+    file_path = raw_path / file_name
     with open(file_path, "w") as f:
         json.dump(data, f)
 
