@@ -139,3 +139,6 @@ dmypy.json
 
 #data
 data/example/
+data/demokritos/
+data/openweathremap/
+

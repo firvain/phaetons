@@ -40,3 +40,4 @@ def insertJson(j):
         client.close()
     except ConnectionFailure:
         print("Server not available")
+
