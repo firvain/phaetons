@@ -6,6 +6,7 @@ import os
 
 load_dotenv()
 BASE_DATA_DIR = os.getenv("BASE_DATA_DIR")
+openweathermap_api_key =  os.getenv("OPENWEATHER_API_KEY")
 
 locations = {
     "Athens": {"lat": 37.97945, "lon": 23.716221},
